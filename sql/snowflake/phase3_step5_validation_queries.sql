@@ -1,0 +1,35 @@
+-- Phase 3 - Step 5
+-- Validation queries after running Airflow DAG smartfactory_phase3_ingestion.
+
+USE ROLE ACCOUNTADMIN;
+USE WAREHOUSE COMPUTE_WH;
+USE DATABASE SMARTFACTORY_DB;
+USE SCHEMA RAW_DATA;
+
+-- 1) Row-count snapshot for all RAW tables touched in Phase 3
+SELECT 'SENSOR_DATA_RAW' AS table_name, COUNT(*) AS row_count FROM SENSOR_DATA_RAW
+UNION ALL
+SELECT 'WORK_ORDERS_RAW' AS table_name, COUNT(*) AS row_count FROM WORK_ORDERS_RAW
+UNION ALL
+SELECT 'MACHINE_STATUS_RAW' AS table_name, COUNT(*) AS row_count FROM MACHINE_STATUS_RAW;
+
+-- 2) Freshness check: latest timestamp per table
+SELECT
+    'SENSOR_DATA_RAW' AS table_name,
+    MAX(TIMESTAMP) AS latest_event_ts
+FROM SENSOR_DATA_RAW
+UNION ALL
+SELECT
+    'WORK_ORDERS_RAW' AS table_name,
+    MAX(CREATED_AT) AS latest_event_ts
+FROM WORK_ORDERS_RAW
+UNION ALL
+SELECT
+    'MACHINE_STATUS_RAW' AS table_name,
+    MAX(LAST_UPDATED) AS latest_event_ts
+FROM MACHINE_STATUS_RAW;
+
+-- 3) Quick sample preview (latest rows)
+SELECT * FROM WORK_ORDERS_RAW ORDER BY CREATED_AT DESC LIMIT 10;
+SELECT * FROM MACHINE_STATUS_RAW ORDER BY LAST_UPDATED DESC LIMIT 10;
+SELECT * FROM SENSOR_DATA_RAW ORDER BY TIMESTAMP DESC LIMIT 10;

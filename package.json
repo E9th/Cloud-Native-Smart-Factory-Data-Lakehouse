@@ -6,13 +6,18 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node dist/sensor-generator.js",
-    "dev": "tsx src/sensor-generator.ts"
+    "start:api": "node dist/api-server.js",
+    "dev": "tsx src/sensor-generator.ts",
+    "dev:generator": "tsx src/sensor-generator.ts",
+    "dev:api": "tsx src/api-server.ts"
   },
   "dependencies": {
-    "amqplib": "^0.10.8"
+    "amqplib": "^0.10.8",
+    "express": "^4.21.2"
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.7",
+    "@types/express": "^4.17.21",
     "@types/node": "^22.15.3",
     "tsx": "^4.19.3",
     "typescript": "^5.8.3"
