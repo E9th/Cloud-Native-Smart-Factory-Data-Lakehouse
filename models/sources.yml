@@ -1,0 +1,13 @@
+version: 2
+
+sources:
+  - name: raw_data
+    database: SMARTFACTORY_DB
+    schema: RAW_DATA
+    tables:
+      - name: sensor_data_raw
+        identifier: SENSOR_DATA_RAW
+      - name: machine_status_raw
+        identifier: MACHINE_STATUS_RAW
+      - name: work_orders_raw
+        identifier: WORK_ORDERS_RAW
