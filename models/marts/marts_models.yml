@@ -1,0 +1,19 @@
+version: 2
+
+models:
+  - name: fct_machine_health_hourly
+    columns:
+      - name: hour_ts
+        tests:
+          - not_null
+      - name: machine_id
+        tests:
+          - not_null
+  - name: fct_work_orders_status
+    columns:
+      - name: order_day
+        tests:
+          - not_null
+      - name: machine_id
+        tests:
+          - not_null
