@@ -1,0 +1,28 @@
+version: 2
+
+models:
+  - name: stg_sensor_data
+    columns:
+      - name: event_ts
+        tests:
+          - not_null
+      - name: machine_id
+        tests:
+          - not_null
+  - name: stg_machine_status
+    columns:
+      - name: machine_id
+        tests:
+          - not_null
+      - name: status
+        tests:
+          - not_null
+  - name: stg_work_orders
+    columns:
+      - name: order_id
+        tests:
+          - not_null
+          - unique
+      - name: machine_id
+        tests:
+          - not_null

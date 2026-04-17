@@ -15,6 +15,12 @@
 - Manual fallback (no Airflow runtime): `scripts/phase3_manual_fallback.ps1`
 - PostgreSQL MES source setup: `sql/postgres/phase3_prepare_mes_source_tables.sql`
 
+## Phase 4 Starter Kit
+
+- Runbook: `docs/phase-4-runbook.md`
+- Python EDA template: `python/phase4_eda_template.py`
+- Python Phase 4 dependencies: `python/requirements-phase4.txt`
+
 ## Sensor Data Generator (Direct to RabbitMQ)
 
 This project includes a TypeScript sensor data generator that continuously publishes machine telemetry to RabbitMQ.
