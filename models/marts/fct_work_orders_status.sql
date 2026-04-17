@@ -5,4 +5,5 @@ select
     count(*) as order_count,
     sum(target_quantity) as target_quantity_sum
 from {{ ref('stg_work_orders') }}
+where created_at is not null
 group by 1, 2, 3
