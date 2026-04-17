@@ -5,4 +5,4 @@ select
     target_quantity,
     order_status,
     created_at
-from {{ source('raw_data', 'WORK_ORDERS_RAW') }}
+from {{ source('raw_data', 'work_orders_raw') }}
