@@ -18,6 +18,7 @@
 ## Phase 4 Starter Kit
 
 - Runbook: `docs/phase-4-runbook.md`
+- Summary: `docs/phase-4-summary.md`
 - Python EDA template: `python/phase4_eda_template.py`
 - Python Phase 4 dependencies: `python/requirements-phase4.txt`
 

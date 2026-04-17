@@ -234,7 +234,7 @@ Use local script template `python/phase4_eda_template.py`.
 Install packages:
 
 ```powershell
-pip install -r python/requirements-phase4.txt
+.\.venv\Scripts\python.exe -m pip install -r .\python\requirements-phase4.txt
 ```
 
 Set env vars (PowerShell example):
@@ -252,7 +252,8 @@ $env:SNOWFLAKE_SCHEMA = "RAW_DATA"
 Run script:
 
 ```powershell
-python python/phase4_eda_template.py
+Test-Path .\python\phase4_eda_template.py
+python .\python\phase4_eda_template.py
 ```
 
 Output:
