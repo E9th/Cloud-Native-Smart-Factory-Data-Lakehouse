@@ -7,8 +7,8 @@ with source_data as (
 )
 
 select
-    machine_id,
-    status,
+    upper(machine_id) as machine_id,
+    upper(status) as status,
     status_ts
 from source_data
 where machine_id is not null
