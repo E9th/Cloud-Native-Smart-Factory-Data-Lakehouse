@@ -7,9 +7,9 @@ with source_data as (
 )
 
 select
-    upper(machine_id) as machine_id,
-    upper(status) as status,
+        nullif(regexp_replace(upper(machine_id), '[^A-Z0-9-]', ''), '') as machine_id,
+        nullif(regexp_replace(upper(status), '[^A-Z_]', ''), '') as status,
     status_ts
 from source_data
-where machine_id is not null
-  and status is not null
+where nullif(regexp_replace(upper(machine_id), '[^A-Z0-9-]', ''), '') is not null
+    and nullif(regexp_replace(upper(status), '[^A-Z_]', ''), '') is not null
