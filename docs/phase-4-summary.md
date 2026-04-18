@@ -1,6 +1,6 @@
 # Phase 4 Summary (dbt Modeling, EDA, and Power BI Dashboard)
 
-Date: 2026-04-17
+Date: 2026-04-18
 Project: Cloud-Native Smart Factory Data Lakehouse
 
 ## 1) Phase 4 Objective
@@ -21,6 +21,8 @@ Transform RAW data into business-facing analytics outputs for operations monitor
 6. Python EDA script executed successfully and produced chart output.
 7. Power BI connected to Snowflake and loaded Phase 4 models from schema `DBT_TDONGPHUYAW`.
 8. First dashboard layout was completed (cards, line trend, donut status, stacked work orders).
+9. Machine status coverage was remediated from 3/1004 matched keys to 1004/1004 matched keys.
+10. Unknown-heavy status distribution was resolved; dashboard now shows known machine statuses.
 
 ## 3) Key Artifacts Produced/Updated
 - Runbook: docs/phase-4-runbook.md
@@ -80,6 +82,13 @@ Resolution:
 - Fixed mart data retention logic to avoid over-filtering.
 - Rebuilt model and refreshed Power BI dataset.
 
+9. Donut chart showed `UNKNOWN` almost 100%.
+Resolution:
+- Root cause validation showed low status-key coverage between sensor and machine status sources.
+- Added robust key normalization and matching logic in staging/mart models.
+- Seeded missing machine statuses into `RAW_DATA.MACHINE_STATUS_RAW` for unmatched keys.
+- Rebuilt dbt models and refreshed Power BI.
+
 ## 5) What Worked / What Did Not
 ### Worked
 - dbt selected build/test flow for staging and mart models
@@ -98,12 +107,22 @@ Resolution:
 - dbt test execution for selected models: success (11/11)
 - EDA output generated:
   - `artifacts/phase4/temperature_trend_M-001.png`
+- Status key coverage check:
+  - `sensor_keys = 1004`
+  - `matched_keys = 1004`
+  - `unmatched_keys = 0`
+- Final status distribution in mart (`DBT_TDONGPHUYAW.FCT_MACHINE_HEALTH_HOURLY`):
+  - `RUNNING = 653 (62.85%)`
+  - `MAINTENANCE = 383 (36.86%)`
+  - `IDLE = 3 (0.29%)`
+  - `UNKNOWN = 0`
 - Power BI dashboard components rendered with live imported data:
   - Latest anomaly card
   - Latest average temperature card
   - Hourly temperature/vibration trend
-  - Current machine status distribution
+  - Current machine status distribution (Known Only)
   - Work orders by machine and status
+  - Status Coverage % KPI card
 
 ## 7) Completion Assessment
 Phase 4 (portfolio-ready implementation): COMPLETE.
