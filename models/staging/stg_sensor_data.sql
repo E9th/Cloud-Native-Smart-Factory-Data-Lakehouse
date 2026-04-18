@@ -9,9 +9,9 @@ with source_data as (
 
 select
     event_ts,
-    upper(machine_id) as machine_id,
+    nullif(regexp_replace(upper(machine_id), '[^A-Z0-9-]', ''), '') as machine_id,
     temperature,
     vibration
 from source_data
 where event_ts is not null
-  and machine_id is not null
+  and nullif(regexp_replace(upper(machine_id), '[^A-Z0-9-]', ''), '') is not null
