@@ -19,8 +19,20 @@
 
 - Runbook: `docs/phase-4-runbook.md`
 - Summary: `docs/phase-4-summary.md`
+- Final analytics pack: `docs/phase-4-analytics-final.md`
 - Python EDA template: `python/phase4_eda_template.py`
 - Python Phase 4 dependencies: `python/requirements-phase4.txt`
+
+### Final analytics run commands
+
+```bash
+dbt build --select fct_machine_health_hourly fct_machine_risk_hourly
+dbt test --select fct_machine_risk_hourly
+```
+
+```powershell
+.\.venv\Scripts\python.exe .\python\phase4_eda_template.py
+```
 
 ## Sensor Data Generator (Direct to RabbitMQ)
 

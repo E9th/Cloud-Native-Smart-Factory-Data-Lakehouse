@@ -26,6 +26,7 @@ Transform RAW data into business-facing analytics outputs for operations monitor
 
 ## 3) Key Artifacts Produced/Updated
 - Runbook: docs/phase-4-runbook.md
+- Final analytics pack: docs/phase-4-analytics-final.md
 - Summary (this document): docs/phase-4-summary.md
 - dbt source declarations: models/sources.yml
 - Staging models:
@@ -34,7 +35,10 @@ Transform RAW data into business-facing analytics outputs for operations monitor
   - models/staging/stg_work_orders.sql
 - Mart models:
   - models/marts/fct_machine_health_hourly.sql
+  - models/marts/fct_machine_risk_hourly.sql
   - models/marts/fct_work_orders_status.sql
+- Additional tests:
+  - tests/fct_machine_risk_hourly_risk_score_range.sql
 - EDA script: python/phase4_eda_template.py
 - EDA dependencies: python/requirements-phase4.txt
 - EDA chart artifact: artifacts/phase4/temperature_trend_M-001.png
