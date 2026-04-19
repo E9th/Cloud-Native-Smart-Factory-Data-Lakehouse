@@ -38,6 +38,94 @@ This repository delivers an end-to-end smart factory data platform from ingestio
 
 Telemetry Source -> API/Generator -> RabbitMQ -> Python Consumer -> S3 -> Snowflake RAW -> dbt Staging/Marts -> Python EDA + Power BI
 
+## Architecture Diagram (Mermaid)
+
+```mermaid
+flowchart LR
+  subgraph Sources["1) Data Sources"]
+    K6[k6 load test]
+    GEN[TypeScript sensor generator]
+    MES[(PostgreSQL MES)]
+  end
+
+  subgraph Ingest["2) Ingestion & Queue"]
+    API[Node.js Express API]
+    RMQ{RabbitMQ}
+    S3C[Python S3 consumer]
+  end
+
+  subgraph Landing["3) Data Lake Landing"]
+    S3[(AWS S3\n sensor-data/...\n mes-data/...)]
+  end
+
+  subgraph Orchestration["4) Orchestration"]
+    AF[Apache Airflow DAG\n smartfactory_phase3_ingestion]
+    EXT[SqlToS3Operator\n extract MES to S3 CSV]
+    COPY[SnowflakeOperator\n COPY INTO RAW_DATA]
+    Fallback[PowerShell fallback\n phase3_manual_fallback.ps1]
+  end
+
+  subgraph Warehouse["5) Snowflake RAW"]
+    RAW_SENSOR[(SENSOR_DATA_RAW)]
+    RAW_WORK[(WORK_ORDERS_RAW)]
+    RAW_STATUS[(MACHINE_STATUS_RAW)]
+  end
+
+  subgraph Transform["6) dbt Transform"]
+    STG[stg_sensor_data\n stg_work_orders\n stg_machine_status]
+    FCT_H[fct_machine_health_hourly]
+    FCT_W[fct_work_orders_status]
+    FCT_R[fct_machine_risk_hourly]
+    TESTS[dbt tests]
+  end
+
+  subgraph Consume["7) Analytics & BI"]
+    EDA[Python EDA]
+    ART[(artifacts/phase4)]
+    PBI[Power BI dashboard]
+  end
+
+  K6 --> API
+  GEN --> RMQ
+  API --> RMQ
+  RMQ --> S3C
+  S3C -->|batch JSON/CSV| S3
+
+  MES --> EXT
+  AF -. schedule .-> EXT
+  AF -. run COPY .-> COPY
+  EXT -->|CSV| S3
+
+  S3 --> COPY
+  COPY --> RAW_SENSOR
+  COPY --> RAW_WORK
+  COPY --> RAW_STATUS
+
+  MES -. when Airflow unavailable .-> Fallback
+  Fallback -. upload/copy .-> S3
+
+  RAW_SENSOR --> STG
+  RAW_WORK --> STG
+  RAW_STATUS --> STG
+  STG --> FCT_H
+  STG --> FCT_W
+  FCT_H --> FCT_R
+  FCT_H --> TESTS
+  FCT_W --> TESTS
+  FCT_R --> TESTS
+
+  RAW_SENSOR --> EDA
+  EDA --> ART
+  FCT_H --> PBI
+  FCT_W --> PBI
+  FCT_R --> PBI
+```
+
+Notes:
+- API framework is Express (not Fastify) in current implementation.
+- Airflow currently orchestrates extract/load into Snowflake RAW for Phase 3; dbt runs are managed separately.
+- BI target in this repository is Power BI.
+
 ## Tech Stack and Purpose
 
 ### Data ingestion and application layer
