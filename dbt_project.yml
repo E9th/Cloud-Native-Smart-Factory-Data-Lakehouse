@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 # Name your project! Project names should contain only lowercase characters
 # and underscores. A good package name should reflect your organization's
@@ -12,6 +13,14 @@ profile: 'default'
 # These configurations specify where dbt should look for different types of files.
 # The `model-paths` config, for example, states that models in this project can be
 # found in the "models/" directory. You probably won't need to change these!
+=======
+name: smartfactory_snowflake
+version: 1.0.0
+config-version: 2
+
+profile: smartfactory_snowflake
+
+>>>>>>> fe43dcb6853f472ae7378a5c665aacae8e257a0b
 model-paths: ["models"]
 analysis-paths: ["analyses"]
 test-paths: ["tests"]
@@ -19,6 +28,7 @@ seed-paths: ["seeds"]
 macro-paths: ["macros"]
 snapshot-paths: ["snapshots"]
 
+<<<<<<< HEAD
 target-path: "target"  # directory which will store compiled SQL files
 clean-targets:         # directories to be removed by `dbt clean`
   - "target"
@@ -40,3 +50,13 @@ models:
     # Applies to all files under models/example/
     example:
       +materialized: table
+=======
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  smartfactory_snowflake:
+    +materialized: view
+>>>>>>> fe43dcb6853f472ae7378a5c665aacae8e257a0b
