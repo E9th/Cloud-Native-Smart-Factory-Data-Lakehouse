@@ -17,3 +17,19 @@ models:
       - name: machine_id
         tests:
           - not_null
+  - name: fct_machine_risk_hourly
+    columns:
+      - name: hour_ts
+        tests:
+          - not_null
+      - name: machine_id
+        tests:
+          - not_null
+      - name: machine_risk_score
+        tests:
+          - not_null
+      - name: machine_risk_level
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['LOW', 'MEDIUM', 'HIGH']
