@@ -1,157 +1,151 @@
-# Cloud-Native-Smart-Factory-Data-Lakehouse
+# Cloud-Native Smart Factory Data Lakehouse
 
-## Project Checkpoint
+Project status: Completed (Phase 4 portfolio-ready release)
 
-- Phase 2 status snapshot (2026-04-16): `docs/phase-2-checkpoint-2026-04-16.md`
+This repository delivers an end-to-end smart factory data platform from ingestion to analytics dashboard:
+- IoT sensor ingestion (HTTP and direct queue publisher)
+- Message queue and batch landing to S3 data lake
+- Snowflake RAW loading and transformation with dbt
+- Feature engineering and risk scoring for machine health
+- Power BI dashboard for operational decisions
 
-## Phase 3 Starter Kit
+## End-to-End Workflow
 
-- Runbook: `docs/phase-3-runbook.md`
-- Snowflake Step 1 SQL: `sql/snowflake/phase3_step1_create_mes_raw_tables.sql`
-- Snowflake Step 2 SQL template: `sql/snowflake/phase3_step2_storage_integration_template.sql`
-- Snowflake Step 5 validation SQL: `sql/snowflake/phase3_step5_validation_queries.sql`
-- Airflow DAG: `airflow/dags/smartfactory_phase3_ingestion.py`
-- Airflow local runtime compose: `airflow/docker-compose.local.yml`
-- Manual fallback (no Airflow runtime): `scripts/phase3_manual_fallback.ps1`
-- PostgreSQL MES source setup: `sql/postgres/phase3_prepare_mes_source_tables.sql`
+1. Data generation and ingestion
+- Sensor Generator (TypeScript) publishes telemetry to RabbitMQ.
+- API Server (Express) accepts POST /api/sensor-data and publishes to RabbitMQ.
 
-## Phase 4 Starter Kit
+2. Landing zone and storage
+- Python consumer reads queue messages, batches by size/time, writes JSON or CSV, and uploads to S3 partition path.
 
-- Runbook: `docs/phase-4-runbook.md`
-- Summary: `docs/phase-4-summary.md`
-- Final analytics pack: `docs/phase-4-analytics-final.md`
-- Python EDA template: `python/phase4_eda_template.py`
-- Python Phase 4 dependencies: `python/requirements-phase4.txt`
+3. Raw warehouse loading
+- Snowflake RAW tables receive data from S3 stage via COPY INTO.
+- MES data path (PostgreSQL -> S3 -> Snowflake) runs through Airflow DAG or manual fallback.
 
-### Final analytics run commands
+4. Transformation and quality checks
+- dbt source declarations and staging models clean and normalize raw fields.
+- dbt mart models build business views:
+  - fct_machine_health_hourly
+  - fct_work_orders_status
+  - fct_machine_risk_hourly
+- dbt tests validate not_null, unique, accepted_values, and risk score range.
+
+5. Analytics and reporting
+- Python EDA script computes correlations, rolling features, baselines, sustained breaches, and risk ranking outputs.
+- Power BI dashboard consumes transformed Snowflake views and DAX measures for operational KPIs.
+
+## Architecture Summary
+
+Telemetry Source -> API/Generator -> RabbitMQ -> Python Consumer -> S3 -> Snowflake RAW -> dbt Staging/Marts -> Python EDA + Power BI
+
+## Tech Stack and Purpose
+
+### Data ingestion and application layer
+- TypeScript + Node.js: Sensor publisher and ingestion API runtime
+- Express: HTTP ingestion endpoints and simple dashboard endpoint
+- amqplib: RabbitMQ publish/queue channel operations
+- RabbitMQ: Message buffer/decoupling between producers and consumers
+
+### Batch movement and cloud storage
+- Python 3: S3 consumer and analytics scripts
+- pika: RabbitMQ consumption in Python worker
+- boto3: S3 upload and object operations
+- AWS S3: Data lake landing zone and partitioned object storage
+
+### Warehouse and transformations
+- Snowflake: Central cloud warehouse (RAW and analytics schemas)
+- dbt Cloud / dbt Core patterns: SQL transformation, lineage, testing, deployment jobs
+
+### Analytics and BI
+- pandas: Data shaping and feature construction
+- matplotlib + seaborn: EDA charts and correlation visualization
+- Power BI: KPI and operational dashboard consumption layer
+
+### Orchestration and local runtime
+- Apache Airflow (DAG assets): Orchestrated MES bridge flow
+- Docker Compose: Local services for PostgreSQL and RabbitMQ
+- PowerShell scripts: Operational fallback and environment setup utilities
+
+### Performance and validation
+- k6: API load testing and baseline SLO evaluation
+
+## Repository Map
+
+- src/: TypeScript API and sensor generator
+- python/: Queue consumer and analytics scripts
+- models/: dbt sources, staging, marts
+- tests/: custom dbt tests
+- sql/: Snowflake and PostgreSQL SQL assets
+- airflow/: DAG and local Airflow compose
+- docs/: runbooks, summaries, and final project documents
+- k6/: load test scripts
+- scripts/: fallback and environment helper scripts
+
+## Quick Start (Core Components)
+
+### 1) Start local infra
+
+```powershell
+docker compose up -d
+```
+
+### 2) Run API or sensor generator
+
+```powershell
+npm install
+npm run dev:api
+```
+
+Or run direct generator:
+
+```powershell
+npm run dev:generator
+```
+
+### 3) Run Python S3 consumer
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r .\python\requirements.txt
+.\.venv\Scripts\python.exe .\python\s3_consumer.py
+```
+
+### 4) Build analytics marts (dbt)
 
 ```bash
 dbt build --select fct_machine_health_hourly fct_machine_risk_hourly
 dbt test --select fct_machine_risk_hourly
 ```
 
+### 5) Run Phase 4 EDA package
+
 ```powershell
+.\.venv\Scripts\python.exe -m pip install -r .\python\requirements-phase4.txt
 .\.venv\Scripts\python.exe .\python\phase4_eda_template.py
 ```
 
-## Sensor Data Generator (Direct to RabbitMQ)
+## Key Documents
 
-This project includes a TypeScript sensor data generator that continuously publishes machine telemetry to RabbitMQ.
+- Final completion and full lessons learned: docs/project-completion-report.md
+- Final completion report (Thai): docs/project-completion-report.th.md
+- Executive one-pager (Thai): docs/executive-one-pager.th.md
+- Phase 4 final analytics pack: docs/phase-4-analytics-final.md
+- Phase 4 runbook: docs/phase-4-runbook.md
+- Phase 4 summary: docs/phase-4-summary.md
+- Phase 3 runbook: docs/phase-3-runbook.md
+- Phase 3 summary: docs/phase-3-summary.md
+- Phase 2 checkpoint: docs/phase-2-checkpoint-2026-04-16.md
 
-### Payload format
+## Known Limitations
 
-The generator publishes JSON payloads like:
+- Current dashboard can show 0/blank for high-risk KPIs when filtered window has no HIGH rows or sparse mock timestamps.
+- Airflow local runtime can be blocked by external image/network pull constraints; manual fallback path is included.
+- OEE values are availability proxy only unless quality/performance production fields are added.
 
-{
-	"timestamp": "2026-04-14T07:30:00Z",
-	"machine_id": "M-001",
-	"temperature": 85.5,
-	"vibration": 1.2
-}
+## Project Completion Criteria
 
-### Setup
-
-1. Start RabbitMQ and Postgres with Docker Compose.
-2. Install dependencies.
-3. Run the generator.
-
-Commands:
-
-docker compose up -d
-npm install
-npm run dev
-
-### Config via environment variables
-
-- RABBITMQ_URL (default: amqp://guest:guest@localhost:5672)
-- RABBITMQ_QUEUE (default: sensor_data_queue)
-- PUBLISH_INTERVAL_MS (default: 1000)
-- MACHINE_IDS (default: M-001,M-002,M-003)
-
-## Sensor Ingestion API + UI Dashboard
-
-This API receives sensor payloads over HTTP, publishes them to RabbitMQ, and exposes a simple dashboard UI.
-
-### Run API server
-
-docker compose up -d
-npm install
-npm run dev:api
-
-### Open dashboard
-
-http://localhost:3000
-
-### API endpoint
-
-POST /api/sensor-data
-
-Example JSON:
-
-{
-	"timestamp": "2026-04-14T07:30:00Z",
-	"machine_id": "M-001",
-	"temperature": 85.5,
-	"vibration": 1.2
-}
-
-## Load Test with k6
-
-The k6 script sends sensor data to the API and simulates 1,000 machines for 1 minute.
-
-Script:
-
-k6/sensor-load-test.js
-
-Run command:
-
-k6 run k6/sensor-load-test.js
-
-Optional custom API base URL:
-
-k6 run -e BASE_URL=http://localhost:3000 k6/sensor-load-test.js
-
-## Data Ingestion Consumer (RabbitMQ to AWS S3)
-
-This Python consumer reads messages from sensor_data_queue, batches records in memory, then writes a batch file and uploads it to S3.
-
-Batch flush conditions (whichever comes first):
-
-- 10,000 messages
-- 5 minutes (300 seconds)
-
-### Files
-
-- python/s3_consumer.py
-- python/requirements.txt
-
-### Install dependencies
-
-pip install -r python/requirements.txt
-
-### Required environment variables
-
-- S3_BUCKET: target S3 bucket name
-
-### Optional environment variables
-
-- RABBITMQ_URL (default: amqp://guest:guest@localhost:5672)
-- RABBITMQ_QUEUE (default: sensor_data_queue)
-- BATCH_SIZE (default: 10000)
-- FLUSH_INTERVAL_SECONDS (default: 300)
-- OUTPUT_FORMAT (default: json, allowed: json or csv)
-- S3_PREFIX (default: sensor-data)
-
-### Run consumer
-
-python python/s3_consumer.py
-
-### S3 object layout
-
-Uploaded files are partitioned by date:
-
-S3_PREFIX/year=YYYY/month=MM/day=DD/sensor_data_YYYYMMDD_HHMMSS.json
-
-or
-
-S3_PREFIX/year=YYYY/month=MM/day=DD/sensor_data_YYYYMMDD_HHMMSS.csv
+Project is considered complete because:
+- End-to-end data flow to Snowflake and analytics marts is functional.
+- dbt models and tests for core marts are implemented and validated.
+- Phase 4 analytics outputs and risk scoring artifacts are generated.
+- Power BI dashboard is connected to transformed data and operational KPIs are delivered.
+- Documentation now includes workflow, issues, resolutions, and technical decisions.
